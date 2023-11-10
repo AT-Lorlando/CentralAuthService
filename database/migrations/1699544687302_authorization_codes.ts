@@ -10,6 +10,7 @@ export default class extends BaseSchema {
       table.integer('client_id').unsigned().references('id').inTable('clients').onDelete('CASCADE')
       table.string('code', 255).notNullable()
       table.timestamp('expires_at').notNullable()
+      table.timestamps(true, true)
     })
   }
 
