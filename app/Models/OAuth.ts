@@ -64,33 +64,40 @@ export const oauthModel: AuthorizationCodeModel = {
 
     await savedToken.related('client').associate(databaseClient)
     await savedToken.related('user').associate(databaseUser)
+    await savedToken.load('client')
+    await savedToken.load('user')
 
     return savedToken.toServerModel()
   },
 
-  // Generate access token.
-  generateAccessToken: async (): Promise<string> => {
-    console.log('generateAccessToken')
-    return Math.random().toString(36).substring(2)
-  },
+  // // Generate access token.
+  // generateAccessToken: async (): Promise<string> => {
+  //   console.log('generateAccessToken')
+  //   return Math.random().toString(36).substring(2)
+  // },
 
-  // Generate refresh token.
-  generateRefreshToken: async (): Promise<string> => {
-    console.log('generateRefreshToken')
-    return Math.random().toString(36).substring(2)
-  },
+  // // Generate refresh token.
+  // generateRefreshToken: async (): Promise<string> => {
+  //   console.log('generateRefreshToken')
+  //   return Math.random().toString(36).substring(2)
+  // },
 
-  // Generate authorization code.
-  generateAuthorizationCode: async (): Promise<string> => {
-    console.log('generateAuthorizationCode')
-    return Math.random().toString(36).substring(2)
-  },
+  // // Generate authorization code.
+  // generateAuthorizationCode: async (): Promise<string> => {
+  //   console.log('generateAuthorizationCode')
+  //   return Math.random().toString(36).substring(2)
+  // },
 
   // Get authorization code.
   getAuthorizationCode: async (authorizationCode): Promise<AuthorizationCode | Falsey> => {
     console.log('getAuthorizationCode', authorizationCode)
     const authCode = await LucidAuthorizationCode.query().where('code', authorizationCode).first()
-    return authCode ? authCode.toServerModel() : false
+    if (!authCode) {
+      return false
+    }
+    await authCode.load('client')
+    await authCode.load('user')
+    return authCode.toServerModel()
   },
 
   // Save authorization code.
@@ -120,7 +127,9 @@ export const oauthModel: AuthorizationCodeModel = {
   // Revoke authorization code.
   revokeAuthorizationCode: async (code): Promise<boolean> => {
     console.log('revokeAuthorizationCode', code)
-    const authCode = await LucidAuthorizationCode.query().where('code', code.code).first()
+    const authCode = await LucidAuthorizationCode.query()
+      .where('code', code.authorizationCode)
+      .first()
     if (authCode) {
       await authCode.delete()
       return true

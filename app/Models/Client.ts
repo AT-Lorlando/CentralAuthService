@@ -37,7 +37,7 @@ export default class Client extends BaseModel {
   public toServerModel(): ServerClient {
     return {
       id: '' + this.id,
-      grants: 'authorization_code',
+      grants: ['authorization_code'],
       redirectUris: this.redirectUri,
     }
   }

@@ -7,7 +7,7 @@ export default class AuthController {
   private oauth = new OAuthServer({ model: oauthModel })
   // Here, we use ServerOptions AuthorizationCodeModel
 
-  public async authorize({ request, response, view, auth, session }: HttpContextContract) {
+  public async authorize({ request, response, view, auth }: HttpContextContract) {
     const clientId = parseInt(request.input('client_id'))
     const redirectUri = request.input('redirect_uri')
     const responseType = request.input('response_type')
@@ -115,5 +115,24 @@ export default class AuthController {
   public async logout({ auth, response }) {
     await auth.logout()
     return response.json({ message: 'Logged out successfully' })
+  }
+
+  // token
+  public async token({ request, response }) {
+    const oauthRequest = new OAuthServer.Request({
+      headers: { ...request.headers() },
+      method: request.method(),
+      query: { ...request.qs() },
+      body: { ...request.body() },
+    })
+
+    const oauthResponse = new OAuthServer.Response(response)
+    console.log('token')
+    try {
+      const token = await this.oauth.token(oauthRequest, oauthResponse)
+      return response.json(token)
+    } catch (err) {
+      return response.status(err.code || 500).json(err)
+    }
   }
 }
