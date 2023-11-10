@@ -8,9 +8,10 @@ export default class extends BaseSchema {
       table.increments('id')
       table.integer('user_id').unsigned().references('id').inTable('users').onDelete('CASCADE')
       table.integer('client_id').unsigned().references('id').inTable('clients').onDelete('CASCADE')
-      table.string('token', 255).notNullable()
-      table.enum('type', ['access', 'refresh']).notNullable()
-      table.timestamp('expires_at').notNullable()
+      table.string('access_token', 255).notNullable()
+      table.string('refresh_token', 255).notNullable()
+      table.timestamp('access_token_expires_at').notNullable()
+      table.timestamp('refresh_token_expires_at').notNullable()
       table.timestamps(true, true)
     })
   }

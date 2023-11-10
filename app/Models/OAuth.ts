@@ -2,7 +2,6 @@ import LucidAuthorizationCode from 'App/Models/AuthorizationCode'
 import LucidToken from 'App/Models/Token'
 import LucidClient from 'App/Models/Client'
 import LucidUser from 'App/Models/User'
-import { TokenType } from 'App/Models/Token'
 import { DateTime } from 'luxon'
 
 import {
@@ -55,11 +54,14 @@ export const oauthModel: AuthorizationCodeModel = {
       return false
     }
 
-    const expiresAt = token.accessTokenExpiresAt || new Date(Date.now() + 3600 * 1000)
+    console.log(token.accessTokenExpiresAt, token.refreshTokenExpiresAt)
+    const accessTokenExpiresAt = token.accessTokenExpiresAt || new Date(Date.now() + 3600 * 1000)
+    const refreshTokenExpiresAt = token.refreshTokenExpiresAt || new Date(Date.now() + 3600 * 1000)
     const savedToken = await LucidToken.create({
-      token: token.accessToken,
-      type: TokenType.ACCESS,
-      expiresAt: DateTime.fromJSDate(expiresAt),
+      accessToken: token.accessToken,
+      refreshToken: token.refreshToken,
+      accessTokenExpiresAt: DateTime.fromJSDate(accessTokenExpiresAt),
+      refreshTokenExpiresAt: DateTime.fromJSDate(refreshTokenExpiresAt),
     })
 
     await savedToken.related('client').associate(databaseClient)

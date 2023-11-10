@@ -5,11 +5,6 @@ import Client from './Client'
 import User from './User'
 import { Token as ServerToken } from 'oauth2-server'
 
-export enum TokenType {
-  ACCESS = 'access',
-  REFRESH = 'refresh',
-}
-
 export default class Token extends BaseModel {
   @column({ isPrimary: true })
   public id: number
@@ -20,14 +15,12 @@ export default class Token extends BaseModel {
   @column()
   public clientId: number
 
+  // I'll explain this when I'll understand it better.
   @column()
-  public token: string
+  public accessToken: string
 
-  // There are two types of tokens: access and refresh.
-  // Access tokens are used to access protected resources,
-  // while refresh tokens are used to get new access tokens.
   @column()
-  public type: TokenType
+  public refreshToken: string
 
   // Relationships
   // A token belongs to a user
@@ -39,7 +32,10 @@ export default class Token extends BaseModel {
   public client: BelongsTo<typeof Client>
 
   @column.dateTime()
-  public expiresAt: DateTime
+  public accessTokenExpiresAt: DateTime
+
+  @column.dateTime()
+  public refreshTokenExpiresAt: DateTime
 
   // Timestamps
   @column.dateTime({ autoCreate: true })
@@ -51,19 +47,22 @@ export default class Token extends BaseModel {
   // Hash token before saving, this is a hook that will be called before saving the token to the database.
   @beforeSave()
   public static async hashToken(token: Token) {
-    if (token.$dirty.token) {
-      token.token = await Hash.make(token.token)
+    if (token.$dirty.accessToken) {
+      token.accessToken = await Hash.make(token.accessToken)
+    }
+    if (token.$dirty.refreshToken) {
+      token.refreshToken = await Hash.make(token.refreshToken)
     }
   }
 
   // Methods
   public toServerModel(): ServerToken {
     return {
-      accessToken: this.token,
-      accessTokenExpiresAt: this.expiresAt.toJSDate(),
+      accessToken: this.accessToken,
+      accessTokenExpiresAt: this.accessTokenExpiresAt.toJSDate(),
       client: this.client.toServerModel(),
-      refreshToken: this.token,
-      refreshTokenExpiresAt: this.expiresAt.toJSDate(),
+      refreshToken: this.refreshToken,
+      refreshTokenExpiresAt: this.refreshTokenExpiresAt.toJSDate(),
       user: this.user,
     } as ServerToken
   }
