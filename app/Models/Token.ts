@@ -3,8 +3,9 @@ import { BaseModel, column, beforeSave, BelongsTo, belongsTo } from '@ioc:Adonis
 import Hash from '@ioc:Adonis/Core/Hash'
 import Client from './Client'
 import User from './User'
+import { Token as ServerToken } from 'oauth2-server'
 
-enum TokenType {
+export enum TokenType {
   ACCESS = 'access',
   REFRESH = 'refresh',
 }
@@ -53,5 +54,17 @@ export default class Token extends BaseModel {
     if (token.$dirty.token) {
       token.token = await Hash.make(token.token)
     }
+  }
+
+  // Methods
+  public toServerModel(): ServerToken {
+    return {
+      accessToken: this.token,
+      accessTokenExpiresAt: this.expiresAt.toJSDate(),
+      client: this.client.toServerModel(),
+      refreshToken: this.token,
+      refreshTokenExpiresAt: this.expiresAt.toJSDate(),
+      user: this.user,
+    } as ServerToken
   }
 }

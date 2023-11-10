@@ -15,6 +15,9 @@ export default class User extends BaseModel {
   // serializeAs null means that the password field will not be returned in the response if we use the toJSON method.
   public password: string
 
+  @column()
+  public rememberMeToken: string | null
+
   // Relationships
   // A user can have many tokens
   @hasMany(() => Token)

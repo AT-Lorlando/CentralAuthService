@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, BelongsTo, belongsTo, column } from '@ioc:Adonis/Lucid/Orm'
 import Client from './Client'
 import User from './User'
+import { AuthorizationCode as ServerAuthorizationCode } from 'oauth2-server'
 
 export default class AuthorizationCode extends BaseModel {
   @column({ isPrimary: true })
@@ -34,4 +35,16 @@ export default class AuthorizationCode extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  // Methods
+  public toServerModel(): ServerAuthorizationCode {
+    return {
+      authorizationCode: this.code,
+      expiresAt: this.expiresAt.toJSDate(),
+      redirectUri: '',
+      scope: '',
+      client: this.client.toServerModel(),
+      user: this.user,
+    }
+  }
 }

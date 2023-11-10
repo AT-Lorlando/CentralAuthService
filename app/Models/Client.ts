@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, HasMany, column, hasMany } from '@ioc:Adonis/Lucid/Orm'
 import AuthorizationCode from './AuthorizationCode'
 import Token from './Token'
+import { Client as ServerClient } from 'oauth2-server'
 
 export default class Client extends BaseModel {
   @column({ isPrimary: true })
@@ -31,4 +32,13 @@ export default class Client extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public updatedAt: DateTime
+
+  // Methods
+  public toServerModel(): ServerClient {
+    return {
+      id: '' + this.id,
+      grants: 'authorization_code',
+      redirectUris: this.redirectUri,
+    }
+  }
 }
